@@ -1,0 +1,12 @@
+{
+  "name": "carousel",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev":"sass ./assets/scss/app.scss ./assets/css/app.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

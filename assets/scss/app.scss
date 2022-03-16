@@ -1,0 +1,126 @@
+$color-white:#fff;
+*,*::before,*::after{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+body,html{
+    min-height:100%;
+    overflow-x:hidden;
+}
+body{
+    padding:50px;
+    font-family:  sans-serif,'Segoe UI', Tahoma, Geneva, Verdana;
+    background:linear-gradient(45deg,#f37646,#f3e946) center center no-repeat;
+    line-height:1.4;
+}
+.title{
+    font-size:25px;
+    color:$color-white;
+    font-weight:bold;
+    margin-bottom:25px;
+}
+.item{
+    margin:40px 10px;
+    background-color:$color-white;
+    box-shadow:0 15px 35px #3232321a, 0 5px 15px #0000001a;
+    transition: transform 0.3s;
+    transform:translate3d(0,-1px,0);
+    img{
+        display:block;
+        max-width:100%;
+        width:100%;
+        height:auto;
+    }
+    &:hover{
+        transform:translate3d(0,-10px,0);
+    }
+}
+.item__body{
+    padding:25px;
+}
+.item__title{
+    font-size:24px;
+    margin-bottom:5px;
+    font-weight: bold;
+    color:#232323;
+}
+.item__description{
+    color:#585858;
+}
+.items{
+    position:relative;
+}
+
+/*---------- CAROUSEL ----------*/
+// On veut faire bouger le panorama(carousel__container) par rapport à cet element là
+.carousel{
+    button{
+        border:none;
+        outline:none;
+    }
+    position:relative;
+    &__next,&__prev{
+        position:absolute;
+        width:40px;
+        height:40px;
+        background: #fff url('../img/right.svg') center center / 20px 20px no-repeat;
+        border-radius: 50%;
+        top:50%;
+        margin-top: -20px;
+        right:-20px;
+        box-shadow:0 15px 35px  #3232321a, 0 5px 15px #0000001a;
+        cursor:pointer;
+        transition: transform 0.3s, opacity 0.3s, visibility 0.3s;
+
+        &--hidden{
+            opacity:0;
+            visibility: hidden;
+        }
+        &:hover{
+            transform:scale(1.15);
+        }
+    }
+    &__prev{
+        background-image: url('../img/left.svg');
+        right:auto;
+        left:-20px;
+     }
+     &__container{
+         display: flex;
+         justify-content: center;
+         transition: transform 0.45s;
+        //  C'est deja gerer en JS
+         transform :transform3d(0,0,0); //pour eviter qu'il applique une autre transformation
+     }
+     &__pagination{
+         position: absolute;
+         bottom: 3%;
+         left: 0;
+         right: 0;
+         text-align: center;
+        //  display: none;
+         @media only screen and(min-width:800px){
+             display:block;
+         }
+         &__btn{
+             display:inline-block;
+             width: 10px;
+             height: 10px;
+             background-color: #fff;
+             border-radius: 50%;
+             margin: 0 5px;
+             box-shadow: 0 2px 5px #3232321a;
+             cursor: pointer;
+             transition: transform 0.35s;
+             &:hover,&:active,&--active,&--active::before{
+                 transform:scale(1.3);
+
+             }
+         }
+     }
+}
+// .carousel__item{
+//     display: inline-block;
+// }
+
