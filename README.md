@@ -1,9 +1,9 @@
 
 # Fonctionnement du Carousel
 
-## À propos de ce tutoriel
+## À propos de Carousel
 
-Je vous propose aujourd'hui de découvrir comment créer un carrousel en utilisant du JavaScript. On n'utilisera pas ici de librairies particulières mais on écrira notre code en utilisant la syntaxe ES6 afin de faciliter l'organisation du code (si vous souhaitez supporter des navigateurs qui ne comprennent pas cette syntaxe libre à vous d'utiliser un outil pour convertir le code).
+On écrira notre code en utilisant la syntaxe ES6 afin de faciliter l'organisation du code (si vous souhaitez supporter des navigateurs qui ne comprennent pas cette syntaxe libre à vous d'utiliser un outil pour convertir le code).
 
 ## L'objectif
 
@@ -15,7 +15,7 @@ Notre objectif est de créer une class `Carousel` qui s'adapte à un maximum sit
 - l'affichage devra-t-être responsive et n'afficher qu'un seul slide lorsque l'on est sur une taille d'écran restreinte.
 - Enfin, le système devra être accessible et permettre une navigation au clavier.
 
-Nous ferons évoluer ce script dans de prochaines vidéos avec, par exemple, la création d'un système de pagination ou encore la gestion d'un système de carrousel infini.
+Nous ferons évoluer ce script dans de prochains jours avec, par exemple, la création d'un système de pagination ou encore la gestion d'un système de carrousel infini.
 Dans ce fichier on va reflechir à ce que l'on va faire au niveau de notre `carousel` et comment il va fonctionner
 Mon idée serai de prendre tous les elements de notre carousel, dans notre cas on en a cinq(5) et les entourer d'une grosse div `<div></div>` et cette grosse div `<div></div>` on va la faire bouger de droite à gauche ce qui va permettre de faire defiler les differents elements
 Et donc on aura
