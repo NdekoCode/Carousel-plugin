@@ -59,41 +59,31 @@ creer une fonction pagination element qui a comme objectif de supprimer d'abord 
 puis de la recreer il doit contenir le code suivant:
 
 ```{JS}
-paginationElement(){
-  let buttons = [];
-  const pagination = this.createElementWithClass('carousel__pagination');
-  const pages = this.root.querySelectorAll('.carousel__pagination')
-    if(pages.length >1){
-      pages.forEach(i=>{
-        i.remove();
-      })
+
+    let buttons = [];
+    const page = document.querySelector('.carousel__pagination')
+    // Si l'element existe on le suppprime du DOM
+    if(this.root.contains(page)){
+    this.root.removeChild(page);
+
     }
+    const pagination = this.createElementWithClass('carousel__pagination');
 
-  // On ajoute le conteneur des puces à l'element `.carousel`
-  this.root.appendChild(pagination);
-  
-  for (let i = 0; i < this.items.length; i = i + this.slidesToScroll) {
-    // On creer à chaque tour de boucle une puce
-    let button = this.createElementWithClass('carousel__pagination__btn','button');
+    // On ajoute le conteneur des puces à l'element `.carousel`
+    this.root.appendChild(pagination);
+    
+    for (let i = 0; i < this.items.length; i = i + this.slidesToScroll) {
+      // On creer à chaque tour de boucle une puce
+      let button = this.createElementWithClass('carousel__pagination__btn','button');
 
-    // Au click sur la puce nous menera au slide voulus ou à la page voulus
-    button.addEventListener('click', () => this.goToItem(i));
+      // Au click sur la puce nous menera au slide voulus ou à la page voulus
+      button.addEventListener('click', () => this.goToItem(i));
 
-    // On ajoute cette puce au containeur des puces
-    pagination.appendChild(button);
-    console.log("Bum");
-    // On ajoute les le button au tableau des bouttons
-    buttons.push(button);
-  }
-  let i=0;
-  this.onMove(index => {
-    let id = Math.floor(index / this.slidesToScroll);
-    let activeButton = buttons[id]
-    if (activeButton) {
-      buttons.forEach(btn => btn.classList.remove('carousel__pagination__btn--active'));
-        activeButton.classList.add('carousel__pagination__btn--active');
+      // On ajoute cette puce au containeur des puces
+      pagination.appendChild(button);
+
+      // On ajoute les le button au tableau des bouttons
+      buttons.push(button);
     }
-  })
-  this.moveCallbacks.forEach(cb=>cb(0));
-}
+    return buttons
 ```

@@ -15,9 +15,15 @@ document.addEventListener('DOMContentLoaded', function () {
   new Carousel(document.querySelector('#carousel1'), {
     slidesVisible: 3,
     slidesToScroll: 3,
-    loop: true,
+    loop: false,
     pagination: true ,
     infinite: true
+  });
+  new Carousel(document.querySelector('#carousel3'), {
+    slidesVisible: 2,
+    slidesToScroll: 2,
+    loop: true,
+    pagination: true
   });
   new Carousel(document.querySelector('#carousel2'), {
     pagination: true,
@@ -25,18 +31,14 @@ document.addEventListener('DOMContentLoaded', function () {
     pagination: true,
     infinite: true
   });
-  new Carousel(document.querySelector('#carousel3'), {
-    slidesVisible: 2,
-    slidesToScroll: 2,
-    loop: false,
-    pagination: true
-  });
 
 });
 
 }
 
 onReady();
+
+
 
 
 

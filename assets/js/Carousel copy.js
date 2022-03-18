@@ -64,6 +64,7 @@
     // On creer notre element racine de notre carousel
     this.root = this.createElementWithClass('carousel');
 
+
     // On creer aussi le `containeur` de notre carousel
     this.container = this.createElementWithClass('carousel__container');
 
@@ -104,15 +105,8 @@
     }
     this.onWindowResize();
     // ----------------- EVENEMENTS ---------
-    let self = this;
     this.moveCallbacks.forEach(cb => cb(this.currentItem))
-    window.addEventListener('resize',function () {
-      self.onWindowResize();
-      if(self.options.pagination){
-        
-      self.paginationElement();
-      }
-    });
+    window.addEventListener('resize', this.onWindowResize.bind(this));
     this.root.addEventListener('keyup', e => {
       if (e.key === 'ArrowRight') {
         this.next();
@@ -187,51 +181,41 @@
     })
   }
 
-paginationElement(){
-  let buttons = [];
-  const pagination = this.createElementWithClass('carousel__pagination');
-  const pages = this.root.querySelectorAll('.carousel__pagination')
-    // if(pages.length >1){
-      pages.forEach(i=>{
-        i.remove();
-      })
-    // }
-
-  // On ajoute le conteneur des puces à l'element `.carousel`
-  this.root.appendChild(pagination);
-  
-  for (let i = 0; i < this.items.length; i = i + this.slidesToScroll) {
-    // On creer à chaque tour de boucle une puce
-    let button = this.createElementWithClass('carousel__pagination__btn','button');
-
-    // Au click sur la puce nous menera au slide voulus ou à la page voulus
-    button.addEventListener('click', () => this.goToItem(i));
-
-    // On ajoute cette puce au containeur des puces
-    pagination.appendChild(button);
-    console.log("Bum");
-    // On ajoute les le button au tableau des bouttons
-    buttons.push(button);
-  }
-  let i=0;
-  this.onMove(index => {
-    let id = Math.floor(index / this.slidesToScroll);
-    let activeButton = buttons[id]
-    if (activeButton) {
-      buttons.forEach(btn => btn.classList.remove('carousel__pagination__btn--active'));
-        activeButton.classList.add('carousel__pagination__btn--active');
-    }
-  })
-  this.moveCallbacks.forEach(cb=>cb(0));
-}
 
   /**
    * Permet de creer les puces de pagination de notre carousel dans le DOM
    */
   createPagination () {
-    this.onWindowResize();
+    
     // Le tableau nous permettra lors de l'ecoute du deplacement vers la page correspondante mettre la classe active sur le boutton qui est actuellement actif 
-    return this.paginationElement();
+    let buttons = [];
+
+    // Le containeur des bouttons des paginations
+    let pagination = this.createElementWithClass('carousel__pagination');
+    
+    // On ajoute le conteneur des puces à l'element `.carousel`
+    this.root.appendChild(pagination);
+    
+    for (let i = 0; i < this.items.length; i = i + this.options.slidesToScroll) {
+      // On creer à chaque tour de boucle une puce
+      let button = this.createElementWithClass('carousel__pagination__btn','button');
+
+      // Au click sur la puce nous menera au slide voulus ou à la page voulus
+      button.addEventListener('click', () => this.goToItem(i));
+
+      // On ajoute cette puce au containeur des puces
+      pagination.appendChild(button);
+
+      // On ajoute les le button au tableau des bouttons
+      buttons.push(button);
+    }
+    this.onMove(index => {
+      let activeButton = buttons[Math.floor(index / this.options.slidesToScroll)]
+      if (activeButton) {
+        buttons.forEach(btn => btn.classList.remove('carousel__pagination__btn--active'));
+          activeButton.classList.add('carousel__pagination__btn--active');
+      }
+    })
   }
   
 
