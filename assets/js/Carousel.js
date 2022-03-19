@@ -2,8 +2,8 @@
  * @class
  * Represente notre carousel ainsi que ces differentes configuration
  */
- export default class Carousel {
-  
+export default class Carousel {
+
   /**
    * Permet de lancer un evenement quand on deplace notre carousel
    * 
@@ -26,8 +26,8 @@
    * 
    * @memberof Carousel
    */
-  constructor (element, options = {}) {
-    
+  constructor(element, options = {}) {
+
     // ---------- DEFINITION DES VARIABLES -------------------
     this.element = element
     this.options = Object.assign({}, {
@@ -39,7 +39,10 @@
       pagination: false,
       auto: false
     }, options);
-    
+    if(this.options.loop && this.options.infinite) {
+      console.log(element);
+      throw new Error(`Un carousel ${element} ne peut etre à la fois en boucle et en infinie`);
+    }
     /**
      * Permet de specifier si oui ou non notre carousel s'effectue sur mobile
      */
@@ -53,6 +56,7 @@
 
     // Le conteneurs des callBacks qui sont appeler sur chaque defilement du carousel
     this.moveCallbacks = [];
+    this.offset = 0;
 
 
     // On conserve uniquement les enfant de `element` dans un tableau lors de l'execution courant sans tenir compte de l'effet asynchrone et du coup dans notre cas on aura 5 elements dans notre `element` au lieu de 6 elements
@@ -91,28 +95,47 @@
       this.container.appendChild(carouselItem)
       return carouselItem
     });
-
+    this.stepSlide = children.length - 2 * this.offset;
     // ---------- FONCTIONS D'INITIALISTATION ---------
     // Apres avoir instancier le carousel on definis les styles adequates à l'ecran qu'on a
+    if (this.options.infinite) {
+      // Comme items = 5 elements alors on aura 15 element dans items pour le defilement infinies
+      // Deviendra le nouveau this.currentItem
+      this.offset = this.slidesVisible + this.slidesToScroll;
+      if(this.offset > children.length) {
+        this.offset =children.length;
+        console.error("Vous n'avez pas assez d'element dans le carousel");
+      }
+      this.items = [
+        // Les elements copier sont des clones et on clone aussi leurs enfants d'ou le `true` dans cloneNode(true)
+        ...this.items.slice(this.items.length - this.offset).map(item => item.cloneNode(true)),
+        ...this.items,
+        ...this.items.slice(0, this.offset).map(item => item.cloneNode(true))
+      ];
+      this.currentItem = this.offset
+      // On va l'appeler ici en tenant compte du fait que ici on ne veut pas avoir d'animation
+      this.goToItem(this.offset, false);
+    }
+    this.items.forEach(carouselItem => this.container.appendChild(carouselItem));
+    // On reinitialise les styles
     this.setStyle();
+
     if (this.options.navigation === true) {
       // On initialise aussi la navigation
       this.createNavigation();
     }
     if (this.options.pagination === true) {
-
       // On initialise la pagination
       this.createPagination();
     }
     this.onWindowResize();
     // ----------------- EVENEMENTS ---------
-    let self = this;
     this.moveCallbacks.forEach(cb => cb(this.currentItem))
-    window.addEventListener('resize',function () {
-      self.onWindowResize();
-      if(self.options.pagination){
-        
-      self.paginationElement();
+    window.addEventListener('resize', () => {
+      this.onWindowResize();
+      if (this.options.pagination) {
+
+        this.paginationElement();
       }
     });
     this.root.addEventListener('keyup', e => {
@@ -123,13 +146,17 @@
 
       }
     });
-    if(this.options.auto) {
+    if (this.options.auto) {
       setInterval(() => {
         this.next();
       }, 5000);
     }
+    if (this.options.infinite) {
+
+      this.container.addEventListener('transitionend', this.resetInfinite.bind(this));
+    }
   }
-    
+
   /**
    * Créer un element HTML et lui affecte une classe
    * 
@@ -151,7 +178,7 @@
    *
    * @memberof Carousel
    */
-   setStyle() {
+  setStyle() {
     // On definis une ratio qui va etre un peu la largeur en pourcentages des elements dans le carousel et pout obtenir la ration on fait: le nombre d'item diviser par les nombre d'element que l'on veut afficher
     let ratio = this.items.length / this.slidesVisible;
     // On definis la largeur du `carousel__container`
@@ -165,7 +192,7 @@
   /**
    * Crée les flêches de navigation dans le DOM
    */
-  createNavigation () {
+  createNavigation() {
     // On créer nos bouttons de navigations
     const nextButton = this.createElementWithClass('carousel__next', 'button');
     const prevButton = this.createElementWithClass('carousel__prev', 'button');
@@ -173,7 +200,7 @@
     // On ajoute ces bouttons à l'element racine et non au container
     this.root.appendChild(nextButton);
     this.root.appendChild(prevButton);
-    
+
     // On utilise bind(this) pour lui dire `au click tu applique cette methode mais dans cette methode this faire reference à la classe et non à l'objet sur lequel il s'execute`
     nextButton.addEventListener('click', this.next.bind(this));
     prevButton.addEventListener('click', this.prev.bind(this));
@@ -196,57 +223,59 @@
 
   /**
    * Permet de creer les elements de paginations du carousel càd les puces de pagination de notre carousel dans le DOM
+   * 
    * @memberof Carousel
    */
-paginationElement(){
-  // On créer le tableau qui va contenir nos boutons de pagination (Les puces)
-  let buttons = [];
-  // On creer le conteneur des pagination
-  const pagination = this.createElementWithClass('carousel__pagination');
-  // On selectionne tous les conteneur present dans le root('.carousel')
-  const pages = this.root.querySelectorAll('.carousel__pagination')
-  // On parcours ces conteneur et on les supprime pour eviter la redondance
-      pages.forEach(i=>{
-        i.remove();
-      })
+  paginationElement() {
+    // On créer le tableau qui va contenir nos boutons de pagination (Les puces)
+    let buttons = [];
+    // On creer le conteneur des pagination
+    const pagination = this.createElementWithClass('carousel__pagination');
+    // On selectionne tous les conteneur present dans le root('.carousel')
+    const pages = this.root.querySelectorAll('.carousel__pagination')
+    // On parcours ces conteneur et on les supprime pour eviter la redondance
+    pages.forEach(i => {
+      i.remove();
+    })
 
-  // On ajoute le conteneur des puces à l'element `.carousel` ie le nouveau conteneur
-  this.root.appendChild(pagination);
-  
-  // Cette boucle `for` sera executer autant de fois que Il y a des elements scrollable
-  for (let i = 0; i < this.items.length; i = i + this.slidesToScroll) {
-    // On creer à chaque tour de boucle une puce
-    let button = this.createElementWithClass('carousel__pagination__btn','button');
+    // On ajoute le conteneur des puces à l'element `.carousel` ie le nouveau conteneur
+    this.root.appendChild(pagination);
 
-    // Au click sur la puce nous menera au slide voulus ou à la page voulus
-    button.addEventListener('click', () => this.goToItem(i));
+    // Cette boucle `for` sera executer autant de fois que Il y a des elements scrollable
+    for (let i = 0; i < (this.stepSlide); i = i + this.slidesToScroll) {
+      // On creer à chaque tour de boucle une puce
+      let button = this.createElementWithClass('carousel__pagination__btn', 'button');
 
-    // On ajoute cette puce au containeur des puces
-    pagination.appendChild(button);
-    // On ajoute les le button au tableau des bouttons
-    buttons.push(button);
-  }
-  this.onMove(index => {
-    let id = Math.floor(index / this.slidesToScroll);
-    let activeButton = buttons[id];
-    if (activeButton) {
-      buttons.forEach(btn => btn.classList.remove('carousel__pagination__btn--active'));
-        activeButton.classList.add('carousel__pagination__btn--active');
+      // Au click sur la puce nous menera au slide voulus ou à la page voulus
+      button.addEventListener('click', () => this.goToItem(i + this.offset));
+
+      // On ajoute cette puce au containeur des puces
+      pagination.appendChild(button);
+      // On ajoute les le button au tableau des bouttons
+      buttons.push(button);
     }
-  });
-  this.moveCallbacks.forEach(cb=>cb(this.currentItem));
-}
+    this.onMove(index => {
+      let count = this.stepSlide;
+      let id = Math.floor((index - this.offset) % count / this.slidesToScroll);
+      let activeButton = buttons[id];
+      if (activeButton) {
+        buttons.forEach(btn => btn.classList.remove('carousel__pagination__btn--active'));
+        activeButton.classList.add('carousel__pagination__btn--active');
+      }
+    });
+    this.moveCallbacks.forEach(cb => cb(this.currentItem));
+  }
 
   /**
    * Permet de creer les puces de pagination de notre carousel dans le DOM
    * @memberof Carousel
    */
-  createPagination () {
+  createPagination() {
     this.onWindowResize();
     // Le tableau nous permettra lors de l'ecoute du deplacement vers la page correspondante mettre la classe active sur le boutton qui est actuellement actif 
     return this.paginationElement();
   }
-  
+
 
   /**
    * Rajoute un écouteur qui écoute le déplacement du carousel ET DONC
@@ -256,7 +285,7 @@ paginationElement(){
    * 
    * @memberof Carousel
    */
-   onMove (cb) {
+  onMove(cb) {
     this.moveCallbacks.push(cb)
   }
 
@@ -267,7 +296,7 @@ paginationElement(){
    * 
    * @memberof Carousel
    */
-   onWindowResize() {
+  onWindowResize() {
     // Si la largeur de la fenetre est inferieur à 800px on change les largeurs de nos element et de nos dimension de carousel lors du defilement
     let mobile = window.innerWidth < 800;
     if (mobile !== this.isMobile) {
@@ -283,7 +312,7 @@ paginationElement(){
    *
    * @memberof Carousel
    */
-   next() {
+  next() {
     this.goToItem(this.currentItem + this.slidesToScroll);
   }
 
@@ -298,13 +327,13 @@ paginationElement(){
   }
 
   /**
-   * Permet d'aller à un index particulier du `carousel` et donc Déplace le carousel vers l'element cibler
+   * Permet d'aller à un index particulier du `carousel` et donc Déplace le carousel vers l'element cibler, il servira aussi de fonction clé pour le defilement infinie
    *
    * @param {Number} index L'index sur lequel on veut se rendre
    * @param {Boolean} [animation = true ] Si oui ou non on veut une animation lors du deplacement
    * @memberof Carousel
    */
-   goToItem (index) {
+  goToItem(index, animation = true) {
     if (index < 0) {
       if (this.options.loop) {
         index = this.items.length - this.slidesVisible
@@ -318,19 +347,43 @@ paginationElement(){
         return
       }
     }
+    if (animation === false) {
+      this.container.style.transition = 'none';
+    }
     let translateX = index * -100 / this.items.length
-    this.container.style.transform = 'translate3d(' + translateX + '%, 0, 0)'
+    this.container.style.transform = 'translate3d(' + translateX + '%, 0, 0)';
+    // On recupère une proprieter pour obliger le navigateur à repainter
+    this.container.offsetHeight;
+    if (animation === false) {
+      this.container.style.transition = '';
+    }
     this.currentItem = index
-    this.moveCallbacks.forEach(cb => cb(index))
+    this.moveCallbacks.forEach(cb => cb(this.currentItem))
   }
 
+  /**
+   * Déplacer le container pour donner l'impression d'un slide infinis
+   */
+  resetInfinite() {
+    // debugger
+    // On aura besoin des nombres d'element total avec l'offset (this.offset)
+    // Pour recuperer l'element vers lequel on veut aller j'utilise  le nombre d'element auquel j'ajoute this.items.length et je retire deux fois this.offset
+    if (this.currentItem <= this.options.slidesToScroll) {
+      this.goToItem(this.currentItem + (this.stepSlide), false);
+    } else if (this.currentItem >= this.items.length - this.offset) {
+      this.goToItem(this.currentItem - (this.stepSlide), false);
+    }
+    // à utiliser pour le responsive
+    // this.moveCallbacks.forEach(cb => cb(step))
+    // this.currentItem = (this.stepSlide);
+  }
 
   /**
    * Retourne le nombre le nombre d'element à slider selon qu'on est sur un ecran de type mobile ou desktop
    * 
    * @returns {number}
    */
-   get slidesToScroll() {
+  get slidesToScroll() {
     return this.isMobile ? 1 : this.options.slidesToScroll;
   }
 
