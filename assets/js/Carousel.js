@@ -22,6 +22,7 @@
    * @param {Boolean} [options.navigation = false] Pour avoir les boutons de navigation prev et next
    * @param {Boolean} [options.pagination = false ] Permet d'avoir ou non un systeme de pagination nous permettant d'aller sur une page du carousel en particulier et permettra de savoir sur quel element on est
    * @param {Boolean} [options.infinite = false] Pour avoir une navigation des slides Infinity
+   * @param {Boolean} [options.auto = false] Pour avoir un carousel qui defile automatiquement
    * 
    * @memberof Carousel
    */
@@ -35,7 +36,8 @@
       loop: false,
       navigation: true,
       infinite: false,
-      pagination: false
+      pagination: false,
+      auto: false
     }, options);
     
     /**
@@ -64,7 +66,7 @@
     // On creer notre element racine de notre carousel
     this.root = this.createElementWithClass('carousel');
 
-    // On creer aussi le `containeur` de notre carousel
+    // On creer aussi son conteneur càd le `containeur` de notre carousel
     this.container = this.createElementWithClass('carousel__container');
 
     // ----- L'ACCESSIBILITER POUR NAVIGUER AVEC LES TOUCHES DU CLAVIER -------------
@@ -80,7 +82,7 @@
     this.element.appendChild(this.root);
 
 
-    // On ajoute tous les enfants de `element` dans le containeur de notre carousel et on les retourne après quelques modification
+    // On créer pour chacun des enfants de `element` un element 'carousel__item' qui va contenir chaque `item` de element donc ça sera comme un conteneur pour chaque enfant de `element` et on ajoute les `carousel__item` dans le containeur de notre carousel
     this.items = children.map((item) => {
       // Etant donnée que les enfant peuvent changer de classe suivant le projet on va donc creer un element `carousel__item` dans lequel on va mettre les differents items
       const carouselItem = this.createElementWithClass('carousel__item');
@@ -121,6 +123,11 @@
 
       }
     });
+    if(this.options.auto) {
+      setInterval(() => {
+        this.next();
+      }, 5000);
+    }
   }
     
   /**
@@ -145,12 +152,12 @@
    * @memberof Carousel
    */
    setStyle() {
-    // On definis une ratio qui va etre un peu la largeur en pourcentages des elements dans le carousel qui est le nombre d'item diviser par les nombre d'element que l'on veut afficher
+    // On definis une ratio qui va etre un peu la largeur en pourcentages des elements dans le carousel et pout obtenir la ration on fait: le nombre d'item diviser par les nombre d'element que l'on veut afficher
     let ratio = this.items.length / this.slidesVisible;
     // On definis la largeur du `carousel__container`
     // On ajoute une largeur calculer avec "ratio"
     this.container.style.width = (ratio * 100) + "%";
-    // On parcour tous les elements dans notre `.carousel_container` pour leurs appliquer une largeur calculer
+    // On parcour tous les elements dans notre `.carousel__container` pour leurs appliquer une largeur calculer
     this.items.forEach(carouselItem => carouselItem.style.width = ((100 / this.slidesVisible) / ratio) + '%');
 
   }
@@ -187,19 +194,26 @@
     })
   }
 
+  /**
+   * Permet de creer les elements de paginations du carousel càd les puces de pagination de notre carousel dans le DOM
+   * @memberof Carousel
+   */
 paginationElement(){
+  // On créer le tableau qui va contenir nos boutons de pagination (Les puces)
   let buttons = [];
+  // On creer le conteneur des pagination
   const pagination = this.createElementWithClass('carousel__pagination');
+  // On selectionne tous les conteneur present dans le root('.carousel')
   const pages = this.root.querySelectorAll('.carousel__pagination')
-    // if(pages.length >1){
+  // On parcours ces conteneur et on les supprime pour eviter la redondance
       pages.forEach(i=>{
         i.remove();
       })
-    // }
 
-  // On ajoute le conteneur des puces à l'element `.carousel`
+  // On ajoute le conteneur des puces à l'element `.carousel` ie le nouveau conteneur
   this.root.appendChild(pagination);
   
+  // Cette boucle `for` sera executer autant de fois que Il y a des elements scrollable
   for (let i = 0; i < this.items.length; i = i + this.slidesToScroll) {
     // On creer à chaque tour de boucle une puce
     let button = this.createElementWithClass('carousel__pagination__btn','button');
@@ -209,24 +223,23 @@ paginationElement(){
 
     // On ajoute cette puce au containeur des puces
     pagination.appendChild(button);
-    console.log("Bum");
     // On ajoute les le button au tableau des bouttons
     buttons.push(button);
   }
-  let i=0;
   this.onMove(index => {
     let id = Math.floor(index / this.slidesToScroll);
-    let activeButton = buttons[id]
+    let activeButton = buttons[id];
     if (activeButton) {
       buttons.forEach(btn => btn.classList.remove('carousel__pagination__btn--active'));
         activeButton.classList.add('carousel__pagination__btn--active');
     }
-  })
-  this.moveCallbacks.forEach(cb=>cb(0));
+  });
+  this.moveCallbacks.forEach(cb=>cb(this.currentItem));
 }
 
   /**
    * Permet de creer les puces de pagination de notre carousel dans le DOM
+   * @memberof Carousel
    */
   createPagination () {
     this.onWindowResize();
@@ -251,7 +264,8 @@ paginationElement(){
    * Ecouteur pour le redimensionnement de la fenetre
    * Permet de changer la dimension de nos carousel selon la largeur de la fenetre
    * 
-   * @returns {any}
+   * 
+   * @memberof Carousel
    */
    onWindowResize() {
     // Si la largeur de la fenetre est inferieur à 800px on change les largeurs de nos element et de nos dimension de carousel lors du defilement

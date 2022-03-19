@@ -9,14 +9,13 @@
    * 
    * @callback moveCallback 
    * @param {number} index Le callback a enregistrer dans this.moveCallbacks 
-   * @returns {any}
    */
 
   /**
    * @constructor
    * @param {HTMLElement} element L'element HTML dont on veut transformer en Carousel
    * @param {Object} options Les parametres du carousel
-   * @param {Number} [options.slidesToScroll = 1] Le nombre d'elements à faire défiler
+   * @param {Number} [options.slidesToScroll = 1] Le nombre d'elements à faire défiler dans le carousel
    * @param {Number} [options.slidesVisible = 1] Le nombre d'element visible dans un slide
    * @param {Boolean} [options.loop = false] Permet de masquer ou afficher une navigation si on a un index qui n'a plus de contenus ou si on est à l'index Zero ou au dernier index, il permet de dire si "On doit boucler en fin de carousel" càd afficher le bouton "next" ou "prev"
    * @param {Boolean} [options.navigation = false] Pour avoir les boutons de navigation prev et next
