@@ -12,7 +12,7 @@ const onReady = function () {
    */
   
     new Carousel(document.querySelector('#carousel1'), {
-      slidesVisible: 2,
+      slidesVisible: 3,
       slidesToScroll: 2,
       pagination: true,
       loop: false

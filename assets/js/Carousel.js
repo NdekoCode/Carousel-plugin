@@ -1,6 +1,8 @@
+import CarouselTouchPlugin from './CarouselTouchPlugin.js'
 /**
- * @class
  * Represente notre carousel ainsi que ces differentes configuration
+ * 
+ * @class Carousel
  */
 export default class Carousel {
 
@@ -23,6 +25,7 @@ export default class Carousel {
    * @param {Boolean} [options.pagination = false ] Permet d'avoir ou non un systeme de pagination nous permettant d'aller sur une page du carousel en particulier et permettra de savoir sur quel element on est
    * @param {Boolean} [options.infinite = false] Pour avoir une navigation des slides Infinity
    * @param {Boolean} [options.auto = false] Pour avoir un carousel qui defile automatiquement
+   * @param {Boolean} [options.touch = true] Pour avoir un carousel qui au toucher avec un DRAG
    * 
    * @memberof Carousel
    */
@@ -37,10 +40,10 @@ export default class Carousel {
       navigation: true,
       infinite: false,
       pagination: false,
-      auto: false
+      auto: false,
+      touch: true
     }, options);
     if(this.options.loop && this.options.infinite) {
-      console.log(element);
       throw new Error(`Un carousel ${element} ne peut etre à la fois en boucle et en infinie`);
     }
     /**
@@ -154,6 +157,9 @@ export default class Carousel {
     if (this.options.infinite) {
 
       this.container.addEventListener('transitionend', this.resetInfinite.bind(this));
+    }
+    if(this.options.touch) {
+      new CarouselTouchPlugin(this);
     }
   }
 
@@ -276,7 +282,54 @@ export default class Carousel {
     return this.paginationElement();
   }
 
+  /**
+   * Va permettre de desactiver la transition dans le conteneur de du carousel
+   * 
+   * @memberof Carousel
+   */
+  disableTransition () {
+    this.container.style.transition ='none';
+  }
 
+
+  /**
+   * Va permettre d'activer la transition dans le conteneur de du carousel
+   * 
+   * @memberof Carousel
+   */
+  enableTransition()
+  {
+    this.container.style.transition ='';
+  }
+  /**
+   * Fait une translation du carousel container
+   * 
+   * @param {number} percent La valeur en pourcentage de la translation
+   */
+  translate (percent) {
+
+    this.container.style.transform = `translate3d(${percent}%,0,0)`;
+  }
+
+  /**
+   * Va contenir la largeur du container du contient tous les items
+   * 
+   * @returns {number}
+   * @memberof Carousel
+   */
+  get containerWidth () {
+    return this.container.offsetWidth;
+  }
+
+  /**
+   * Va contenir la largeur du carousel ie de l'element racine du carousel
+   * 
+   * @returns {number}
+   * @memberof Carousel
+   */
+   get carouselWidth () {
+    return this.root.offsetWidth;
+  }
   /**
    * Rajoute un écouteur qui écoute le déplacement du carousel ET DONC
    * Permet d'emmettre un evenement quand on deplace notre carousel et aura pour role d'enregistrer des callBack dans un tableau et cacher l'un des bouton de deplacement
@@ -348,14 +401,14 @@ export default class Carousel {
       }
     }
     if (animation === false) {
-      this.container.style.transition = 'none';
+      this.disableTransition();
     }
     let translateX = index * -100 / this.items.length
-    this.container.style.transform = 'translate3d(' + translateX + '%, 0, 0)';
+    this.translate(translateX);
     // On recupère une proprieter pour obliger le navigateur à repainter
     this.container.offsetHeight;
     if (animation === false) {
-      this.container.style.transition = '';
+      this.enableTransition();
     }
     this.currentItem = index
     this.moveCallbacks.forEach(cb => cb(this.currentItem))
@@ -375,7 +428,6 @@ export default class Carousel {
     }
     // à utiliser pour le responsive
     // this.moveCallbacks.forEach(cb => cb(step))
-    // this.currentItem = (this.stepSlide);
   }
 
   /**

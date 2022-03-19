@@ -97,3 +97,4 @@ paginationElement(){
   this.moveCallbacks.forEach(cb=>cb(0));
 }
 ```
+On va aussi mettre le système tactile à notre carousel, donc le principe c'est de permettre aux utilisateurs avec des glisser deposer de pouvoir naviguer de `slide` en `slide`

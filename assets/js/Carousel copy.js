@@ -195,7 +195,7 @@
     // On ajoute le conteneur des puces à l'element `.carousel`
     this.root.appendChild(pagination);
     
-    for (let i = 0; i < this.items.length; i = i + this.options.slidesToScroll) {
+    for (let i = 0; i < this.items.length; i = i + this.slidesToScroll) {
       // On creer à chaque tour de boucle une puce
       let button = this.createElementWithClass('carousel__pagination__btn','button');
 
