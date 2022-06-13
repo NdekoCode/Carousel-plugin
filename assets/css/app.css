@@ -7,12 +7,13 @@
 body, html {
   min-height: 100%;
   overflow-x: hidden;
+  color: white;
 }
 
 body {
   padding: 50px;
   font-family: sans-serif, "Segoe UI", Tahoma, Geneva, Verdana;
-  background: linear-gradient(45deg, #f37646, #f3e946) center center no-repeat;
+  background: linear-gradient(315deg, #0cbaba 0%, #380036 74%) center center no-repeat;
   line-height: 1.4;
 }
 
